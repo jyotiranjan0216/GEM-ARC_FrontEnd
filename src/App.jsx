@@ -8,7 +8,7 @@ import InterestSelection from './pages/InterestSelection';
 import Dashboard from './pages/Dashboard';
 import Event from './pages/Event';
 import UserProfile from './pages/UserProfile';
-import Leaderboard from './pages/LeaderBoard';
+import Leaderboard from './pages/Leaderboard';
 import Feedback from './pages/Feedback';
 import EventProposal from './pages/EventProposal';
 import MyProposals from './pages/MyProposal';
