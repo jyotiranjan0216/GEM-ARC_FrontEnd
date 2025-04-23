@@ -34,7 +34,7 @@ function InterestSelection() {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/user/interests',
+        'https://gem-arc-backend.onrender.com/api/user/interests',
         { interests: selectedInterests },
         {
           headers: {

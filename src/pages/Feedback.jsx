@@ -32,7 +32,7 @@ function Feedback() {
         throw new Error('No authentication token found. Please login again.');
       }
 
-      const response = await fetch('http://localhost:5000/api/events/allEvents', {
+      const response = await fetch('https://gem-arc-backend.onrender.com/api/events/allEvents', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -101,7 +101,7 @@ function Feedback() {
 
     //   console.log('Submitting feedback:', submissionData); // Debugging line
 
-      const response = await fetch('http://localhost:5000/api/feedback/submit', {
+      const response = await fetch('https://gem-arc-backend.onrender.com/api/feedback/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

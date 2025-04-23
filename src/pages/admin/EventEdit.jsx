@@ -25,7 +25,7 @@ const EventEdit = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/admin/events/${id}`);
+        const { data } = await axios.get(`https://gem-arc-backend.onrender.com/api/admin/events/${id}`);
         const event = data.event;
         
         // Format date for input field
@@ -70,7 +70,7 @@ const EventEdit = () => {
         interestsTags: formData.interestsTags.split(',').map(tag => tag.trim()).filter(Boolean)
       };
       
-      await axios.put(`http://localhost:5000/api/admin/events/${id}`, eventData);
+      await axios.put(`https://gem-arc-backend.onrender.com/api/admin/events/${id}`, eventData);
       
       toast.success('Event updated successfully');
       navigate('/admin/events');

@@ -23,7 +23,7 @@ const FeedbackList = () => {
 
   const fetchFeedback = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/admin/feedback/all');
+      const { data } = await axios.get('https://gem-arc-backend.onrender.com/api/admin/feedback/all');
       setFeedback(data.feedback);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch feedback');
@@ -34,7 +34,7 @@ const FeedbackList = () => {
 
   const fetchEvents = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/events/allEvents');
+      const { data } = await axios.get('https://gem-arc-backend.onrender.com/api/events/allEvents');
       setEvents(data);
     } catch (err) {
       console.error('Failed to fetch events:', err);

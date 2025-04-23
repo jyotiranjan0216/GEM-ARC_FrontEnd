@@ -18,7 +18,7 @@ const EventProposalList = () => {
 
   const fetchProposals = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/admin/event-proposals/all');
+      const { data } = await axios.get('https://gem-arc-backend.onrender.com/api/admin/event-proposals/all');
       setProposals(data.proposals);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch proposals');
@@ -34,7 +34,7 @@ const EventProposalList = () => {
     
     setProcessing(true);
     try {
-      await axios.put(`http://localhost:5000/api/admin/event-proposals/approve/${selectedProposal._id}`, {
+      await axios.put(`https://gem-arc-backend.onrender.com/api/admin/event-proposals/approve/${selectedProposal._id}`, {
         adminFeedback
       });
       
@@ -63,7 +63,7 @@ const EventProposalList = () => {
     
     setProcessing(true);
     try {
-      await axios.put(`http://localhost:5000/api/admin/event-proposals/reject/${selectedProposal._id}`, {
+      await axios.put(`https://gem-arc-backend.onrender.com/api/admin/event-proposals/reject/${selectedProposal._id}`, {
         adminFeedback
       });
       

@@ -40,7 +40,7 @@ function SkillSelection() {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/user/skills',
+        'https://gem-arc-backend.onrender.com/api/user/skills',
         { skills: selectedSkills },
         {
           headers: {

@@ -16,7 +16,7 @@ function MyProposals() {
           throw new Error('No token found. Please login again.');
         }
         
-        const response = await fetch('http://localhost:5000/api/event-proposals/my-proposals', {
+        const response = await fetch('https://gem-arc-backend.onrender.com/api/event-proposals/my-proposals', {
           headers: { Authorization: `Bearer ${token}` }
         });
         

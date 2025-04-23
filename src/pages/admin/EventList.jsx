@@ -17,7 +17,7 @@ const EventList = () => {
 
   const fetchEvents = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/admin/events');
+      const { data } = await axios.get('https://gem-arc-backend.onrender.com/api/admin/events');
       setEvents(data.events);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch events');
@@ -29,7 +29,7 @@ const EventList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/admin/events/${id}`);
+        await axios.delete(`https://gem-arc-backend.onrender.com/api/admin/events/${id}`);
         toast.success('Event deleted successfully');
         setEvents(events.filter(event => event._id !== id));
       } catch (err) {

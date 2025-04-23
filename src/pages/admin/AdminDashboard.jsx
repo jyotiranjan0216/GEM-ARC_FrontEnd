@@ -38,7 +38,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchDashboardStats = async () => {
             try {
-                const { data } = await axios.get('http://localhost:5000/api/admin/dashboard-stats');
+                const { data } = await axios.get('https://gem-arc-backend.onrender.com/api/admin/dashboard-stats');
                 setStats(data.stats);
             } catch (err) {
                 setError(err.response?.data?.error || 'Failed to fetch dashboard stats');
