@@ -39,7 +39,7 @@ function UserProfile() {
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('https://gem-arc-backend.onrender.com/api/user/profile', {
+        const response = await axios.get('http://localhost:5000/api/user/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(response.data);
@@ -113,7 +113,7 @@ function UserProfile() {
       updateData[field] = tempUser[field];
       console.log('Updating user data:', updateData); // Debugging line
       
-      await axios.put('https://gem-arc-backend.onrender.com/api/user/update', updateData, {
+      await axios.put('http://localhost:5000/api/user/update', updateData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -147,7 +147,7 @@ function UserProfile() {
     try {
       console.log('Sending request to upload photo...');
       const response = await axios.post(
-        'https://gem-arc-backend.onrender.com/api/user/upload-profile-photo',
+        'http://localhost:5000/api/user/upload-profile-photo',
         formData,
         {
           headers: {

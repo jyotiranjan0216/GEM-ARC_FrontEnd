@@ -46,7 +46,7 @@ function EventProposal() {
         throw new Error('No token found. Please login again.');
       }
       
-      const response = await fetch('https://gem-arc-backend.onrender.com/api/event-proposals/propose', {
+      const response = await fetch('http://localhost:5000/api/event-proposals/propose', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

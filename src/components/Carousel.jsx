@@ -17,7 +17,7 @@ const Carousel = () => {
       setLoading(true);
 
       try {
-        const res = await axios.get('https://gem-arc-backend.onrender.com/api/events/recommended', {
+        const res = await axios.get('http://localhost:5000/api/events/recommended', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -68,7 +68,7 @@ const Carousel = () => {
     const token = localStorage.getItem('token');
     
     try {
-      await axios.post(`https://gem-arc-backend.onrender.com/api/events/${eventId}/recommend`, {}, {
+      await axios.post(`http://localhost:5000/api/events/${eventId}/recommend`, {}, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

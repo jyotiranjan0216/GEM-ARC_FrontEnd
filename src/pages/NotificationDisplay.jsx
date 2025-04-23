@@ -16,7 +16,7 @@ const NotificationDisplay = () => {
                 if (!token) return;
 
                 // In a production app, you would fetch from your API
-                const response = await fetch('https://gem-arc-backend.onrender.com/api/notifications', {
+                const response = await fetch('http://localhost:5000/api/notifications', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const data = await response.json();
@@ -38,7 +38,7 @@ const NotificationDisplay = () => {
             const token = localStorage.getItem('token');
 
             // In a production app, you would update on your API
-            await fetch(`https://gem-arc-backend.onrender.com/api/notifications/${id}/read`, {
+            await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -63,7 +63,7 @@ const NotificationDisplay = () => {
             const token = localStorage.getItem('token');
 
             // In a production app, you would update on your API
-            await fetch('https://gem-arc-backend.onrender.com/api/notifications/read-all', {
+            await fetch('http://localhost:5000/api/notifications/read-all', {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,

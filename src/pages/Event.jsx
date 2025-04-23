@@ -29,7 +29,7 @@ function Event() {
 
     const fetchEventDetails = async () => {
       try {
-        const response = await axios.get(`https://gem-arc-backend.onrender.com/api/events/${id}`, {
+        const response = await axios.get(`http://localhost:5000/api/events/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setEvent(response.data);
@@ -84,7 +84,7 @@ function Event() {
       });
       
       const response = await axios.post(
-        'https://gem-arc-backend.onrender.com/api/notifications/add',
+        'http://localhost:5000/api/notifications/add',
         {
           userId: userId,
           title,
@@ -127,7 +127,7 @@ function Event() {
     try {
       // First join the event
       const response = await axios.post(
-        'https://gem-arc-backend.onrender.com/api/events/join',
+        'http://localhost:5000/api/events/join',
         {
           eventId: event._id,
           role,
@@ -163,7 +163,7 @@ function Event() {
       setUserRole(role);
       
       // Refresh event data
-      const updatedEvent = await axios.get(`https://gem-arc-backend.onrender.com/api/events/${id}`, {
+      const updatedEvent = await axios.get(`http://localhost:5000/api/events/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEvent(updatedEvent.data);

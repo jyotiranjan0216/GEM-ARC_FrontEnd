@@ -14,7 +14,7 @@ const NotificationComponent = () => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await fetch('https://gem-arc-backend.onrender.com/api/notifications', {
+        const response = await fetch('http://localhost:5000/api/notifications', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -51,7 +51,7 @@ const NotificationComponent = () => {
   const markAsRead = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://gem-arc-backend.onrender.com/api/notifications/${id}/read`, {
+      const response = await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ const NotificationComponent = () => {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://gem-arc-backend.onrender.com/api/notifications/read-all', {
+      const response = await fetch('http://localhost:5000/api/notifications/read-all', {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,

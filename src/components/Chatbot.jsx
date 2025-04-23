@@ -59,7 +59,7 @@ const Chatbot = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'https://gem-arc-backend.onrender.com/api/chatbot/query',
+        'http://localhost:5000/api/chatbot/query',
         { query: inputMessage },
         {
           headers: {

@@ -18,7 +18,7 @@ function Leaderboard() {
     const fetchLeaderboard = async () => {
       try {
         // Fetch leaderboard data
-        const leaderboardResponse = await fetch('https://gem-arc-backend.onrender.com/api/user/leaderboard', {
+        const leaderboardResponse = await fetch('http://localhost:5000/api/user/leaderboard', {
           headers: { Authorization: `Bearer ${token}` },
         });
 

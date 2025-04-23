@@ -48,7 +48,7 @@ function EventCard({ event }) {
       });
       
       const response = await axios.post(
-        'https://gem-arc-backend.onrender.com/api/notifications/add',
+        'http://localhost:5000/api/notifications/add',
         {
           userId: userId,
           title,
@@ -84,7 +84,7 @@ function EventCard({ event }) {
     try {
       // First join the event
       const response = await axios.post(
-        'https://gem-arc-backend.onrender.com/api/events/join',
+        'http://localhost:5000/api/events/join',
         {
           eventId: event._id,
           role,

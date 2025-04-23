@@ -21,7 +21,7 @@ function Dashboard() {
 
     const fetchData = async () => {
       try {
-        const userResponse = await fetch('https://gem-arc-backend.onrender.com/api/user/profile', {
+        const userResponse = await fetch('http://localhost:5000/api/user/profile', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -34,7 +34,7 @@ function Dashboard() {
         setUser({ name });
         setCoins(coins || 0);
 
-        const eventResponse = await fetch('https://gem-arc-backend.onrender.com/api/events/allEvents', {
+        const eventResponse = await fetch('http://localhost:5000/api/events/allEvents', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
