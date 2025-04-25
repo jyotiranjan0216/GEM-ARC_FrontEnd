@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { Mail, Lock, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
 function SignIn() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ function SignIn() {
     captchaInput: ''
   });
   const [captcha, setCaptcha] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,98 +29,149 @@ function SignIn() {
 
   const handleSubmit = async e => {
     e.preventDefault();
-  
+    setIsLoading(true);
+
     if (formData.captchaInput !== captcha) {
       alert('CAPTCHA mismatch!');
       generateCaptcha();
+      setIsLoading(false);
       return;
     }
-  
+
     try {
       const response = await axios.post('https://gem-arc-backend.onrender.com/api/auth/login', {
         email: formData.email,
         password: formData.password
       });
-  
+
       const { user, token } = response.data;
-  
-      // Optional: Save token/user info
+
+      // Save token/user info
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-  
-      // Correctly redirect based on isAdmin
+
+      // Redirect based on isAdmin
       if (user.isAdmin) {
         navigate('/admin/dashboard');
       } else {
         navigate('/dashboard');
       }
-  
+
     } catch (err) {
       alert(err.response?.data?.message || 'Sign In failed');
+    } finally {
+      setIsLoading(false);
     }
   };
-  
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md w-96">
-        <h2 className="text-xl font-bold mb-4 text-center">Sign In</h2>
-
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 mb-4 border rounded"
-          required
-        />
-
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full p-2 mb-4 border rounded"
-          required
-        />
-
-        <div className="flex items-center mb-2">
-          <span className="bg-gray-200 px-3 py-1 rounded font-mono text-lg">{captcha}</span>
-          <button
-            type="button"
-            onClick={generateCaptcha}
-            className="ml-3 text-blue-500 hover:underline text-sm"
-          >
-            Refresh
-          </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+      <div className="max-w-md w-full">
+        {/* Logo Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-extrabold tracking-wide bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+            GEM-ARC
+          </h2>
+          <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-indigo-500 mx-auto mt-2 rounded-full"></div>
+          <p className="text-gray-600 mt-2 text-sm font-medium">Campus Event Management</p>
         </div>
 
-        <input
-          name="captchaInput"
-          type="text"
-          placeholder="Enter CAPTCHA"
-          value={formData.captchaInput}
-          onChange={handleChange}
-          className="w-full p-2 mb-4 border rounded"
-          required
-        />
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          {/* Form Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-500 p-4">
+            <h3 className="text-white text-xl font-semibold text-center">Sign In</h3>
+          </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-        >
-          Sign In
-        </button>
+          {/* Form Body */}
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Mail size={18} className="text-gray-400" />
+              </div>
+              <input
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={handleChange}
+                className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                required
+              />
+            </div>
 
-        <p className="mt-4 text-center text-sm">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-blue-500 hover:underline">
-            Sign up
-          </Link>
-        </p>
-      </form>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock size={18} className="text-gray-400" />
+              </div>
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className="pl-10 pr-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600 font-medium">CAPTCHA Verification</span>
+                <button
+                  type="button"
+                  onClick={generateCaptcha}
+                  className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
+                >
+                  <RefreshCw size={14} className="mr-1" />
+                  Refresh
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="bg-white px-4 py-2 rounded font-mono text-lg border border-gray-200 text-center shadow-sm">
+                  {captcha}
+                </div>
+                <input
+                  name="captchaInput"
+                  type="text"
+                  placeholder="Enter code"
+                  value={formData.captchaInput}
+                  onChange={handleChange}
+                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-500 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-600 focus:ring-4 focus:ring-blue-300 transition-all shadow-md"
+            >
+              {isLoading ? 'Signing In...' : 'Sign In'}
+            </button>
+
+            <div className="mt-4 text-center">
+              <p className="text-gray-600">
+                Don't have an account?{' '}
+                <Link to="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Create Account
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
+        
+        <div className="text-center mt-6 text-xs text-gray-500">
+          © 2025 GEM-ARC. All rights reserved.
+        </div>
+      </div>
     </div>
   );
 }
