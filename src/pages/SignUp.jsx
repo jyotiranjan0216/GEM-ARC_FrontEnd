@@ -50,7 +50,7 @@ function SignUp() {
           <input
             key={field}
             name={field}
-            type={field.includes('password') ? 'password' : 'text'}
+            type={field === 'password' || field === 'confirmPassword' ? 'password' : 'text'}
             placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
             value={formData[field]}
             onChange={handleChange}
@@ -58,6 +58,7 @@ function SignUp() {
             required
           />
         ))}
+
 
         <button
           type="submit"
