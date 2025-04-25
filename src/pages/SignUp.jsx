@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { User, Mail, Phone, Lock, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Phone, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -12,6 +12,7 @@ function SignUp() {
     confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordMatch, setPasswordMatch] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -21,6 +22,9 @@ function SignUp() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    
+    // Clear any previous errors when typing
+    setError('');
 
     // Check password strength
     if (name === 'password') {
@@ -43,8 +47,10 @@ function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Client-side validation to match backend expectations
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
     
@@ -54,18 +60,19 @@ function SignUp() {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        password: formData.password
+        password: formData.password,
+        confirmPassword: formData.confirmPassword // Include confirmPassword as the backend expects it
       });
       
-      const token = res.data.token;
+      const { token } = res.data;
       if (token) {
         localStorage.setItem('token', token);
       }
       
-      alert('Sign Up successful!');
       navigate('/skills');
     } catch (err) {
-      alert(err.response?.data?.message || 'Sign Up failed');
+      // Use error message directly from backend if available
+      setError(err.response?.data?.msg || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -117,6 +124,14 @@ function SignUp() {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-500 p-4">
             <h3 className="text-white text-xl font-semibold text-center">Create Account</h3>
           </div>
+
+          {/* Error message display */}
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 text-sm flex items-center">
+              <AlertCircle size={16} className="mr-2" />
+              {error}
+            </div>
+          )}
 
           {/* Form Body */}
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
