@@ -82,7 +82,7 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-100000">
   {isOpen ? (
     <div className="flex flex-col w-[30rem] h-[40rem] bg-white rounded-lg shadow-xl overflow-hidden border border-gray-300">
       <div className="bg-indigo-700 text-white p-6 flex justify-between items-center rounded-t-lg">
