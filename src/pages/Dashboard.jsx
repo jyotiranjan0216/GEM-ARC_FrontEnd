@@ -114,57 +114,88 @@ function Dashboard() {
     setActiveCategory(showAllEvents ? 'personalized' : 'all');
   };
 
-  // Filter events based on search query
-  const filteredEvents = allEvents.filter(event => 
-    event.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    event.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    event.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter events based on search query - apply to ALL events
+  const filterEvents = (eventsArray) => {
+    if (!searchQuery) return eventsArray;
+    
+    return eventsArray.filter(event => 
+      event.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      event.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      event.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
 
   // Get currently active events based on category filter
   const getActiveEvents = () => {
-    if (showAllEvents) return filteredEvents;
+    if (showAllEvents) return filterEvents(allEvents);
     
+    // Get events for the selected category and filter by search
+    let eventsToFilter;
     switch(activeCategory) {
       case 'personalized':
-        return categoryEvents.personalized;
+        eventsToFilter = categoryEvents.personalized;
+        break;
       case 'upcoming':
-        return categoryEvents.upcoming;
+        eventsToFilter = categoryEvents.upcoming;
+        break;
       case 'tech':
-        return categoryEvents.tech;
+        eventsToFilter = categoryEvents.tech;
+        break;
       case 'business':
-        return categoryEvents.business;
+        eventsToFilter = categoryEvents.business;
+        break;
       case 'creative':
-        return categoryEvents.creative;
+        eventsToFilter = categoryEvents.creative;
+        break;
       case 'education':
-        return categoryEvents.education;
+        eventsToFilter = categoryEvents.education;
+        break;
       case 'social':
-        return categoryEvents.social;
+        eventsToFilter = categoryEvents.social;
+        break;
       case 'other':
-        return categoryEvents.other;
+        eventsToFilter = categoryEvents.other;
+        break;
       case 'all':
       default:
-        // Combine all categories for "All" view but remove trending
-        return [
-          ...categoryEvents.personalized
-        ];
+        eventsToFilter = [...categoryEvents.personalized];
+        break;
     }
+    
+    return filterEvents(eventsToFilter);
   };
 
   // Determine which events to display
   const eventsToDisplay = getActiveEvents();
 
-  // Calculate category counts
-  const counts = {
-    personalized: categoryEvents.personalized.length,
-    upcoming: categoryEvents.upcoming.length,
-    tech: categoryEvents.tech.length,
-    business: categoryEvents.business.length,
-    creative: categoryEvents.creative.length,
-    education: categoryEvents.education.length,
-    social: categoryEvents.social.length,
-    other: categoryEvents.other.length
+  // Calculate filtered category counts
+  const getCategoryCounts = () => {
+    if (searchQuery) {
+      return {
+        personalized: filterEvents(categoryEvents.personalized).length,
+        upcoming: filterEvents(categoryEvents.upcoming).length,
+        tech: filterEvents(categoryEvents.tech).length,
+        business: filterEvents(categoryEvents.business).length,
+        creative: filterEvents(categoryEvents.creative).length,
+        education: filterEvents(categoryEvents.education).length,
+        social: filterEvents(categoryEvents.social).length,
+        other: filterEvents(categoryEvents.other).length
+      };
+    }
+    
+    return {
+      personalized: categoryEvents.personalized.length,
+      upcoming: categoryEvents.upcoming.length,
+      tech: categoryEvents.tech.length,
+      business: categoryEvents.business.length,
+      creative: categoryEvents.creative.length,
+      education: categoryEvents.education.length,
+      social: categoryEvents.social.length,
+      other: categoryEvents.other.length
+    };
   };
+
+  const counts = getCategoryCounts();
 
   // Category info for display
   const categoryInfo = {
@@ -266,22 +297,21 @@ function Dashboard() {
                 </h2>
                 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-                  {showAllEvents && (
-                    <div className="relative w-full sm:w-64">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                        </svg>
-                      </div>
-                      <input 
-                        type="search" 
-                        className="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500" 
-                        placeholder="Search events..." 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
+                  {/* Search bar - now visible at all times */}
+                  <div className="relative w-full sm:w-64">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                      </svg>
                     </div>
-                  )}
+                    <input 
+                      type="search" 
+                      className="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500" 
+                      placeholder="Search events..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
                   
                   <button 
                     onClick={toggleEventView} 
@@ -341,10 +371,14 @@ function Dashboard() {
                   <div className="col-span-3 bg-white rounded-xl shadow-md p-8 text-center">
                     <div className="text-4xl mb-4">{showAllEvents ? '🔍' : categoryInfo[activeCategory]?.icon || '✨'}</div>
                     <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                      {showAllEvents ? 'No events found' : `No ${categoryInfo[activeCategory]?.name || ''} events found`}
+                      {searchQuery 
+                        ? 'No events found matching your search' 
+                        : showAllEvents 
+                          ? 'No events found' 
+                          : `No ${categoryInfo[activeCategory]?.name || ''} events found`}
                     </h3>
                     <p className="text-gray-500">
-                      {showAllEvents && searchQuery 
+                      {searchQuery 
                         ? 'Try a different search term' 
                         : 'Check back later for new events!'}
                     </p>
