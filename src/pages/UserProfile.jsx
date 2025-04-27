@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import NotificationIcon from '../components/NotificationIcon';
 import axios from 'axios';
-import { FaEdit, FaCheck, FaTimes, FaCamera, FaSignOutAlt } from 'react-icons/fa';
+import { FaEdit, FaCheck, FaTimes, FaCamera, FaSignOutAlt, FaSearch } from 'react-icons/fa';
 import NotificationDisplay from './NotificationDisplay';
 
 function UserProfile() {
@@ -28,6 +28,31 @@ function UserProfile() {
   const [newSkill, setNewSkill] = useState('');
   const [newInterest, setNewInterest] = useState('');
   const [tempUser, setTempUser] = useState({});
+  const [skillSearchResults, setSkillSearchResults] = useState([]);
+  const [interestSearchResults, setInterestSearchResults] = useState([]);
+  const [searchSkillQuery, setSearchSkillQuery] = useState('');
+  const [searchInterestQuery, setSearchInterestQuery] = useState('');
+
+  // Pre-defined lists of skills and interests
+  const commonSkills = [
+    'JavaScript', 'Python', 'React', 'Node.js', 'Java', 'HTML/CSS', 'SQL', 'Data Analysis',
+    'Project Management', 'UI/UX Design', 'Marketing', 'Social Media Management', 'Content Writing',
+    'Graphic Design', 'Photography', 'Video Editing', 'Public Speaking', 'Teaching', 'Leadership',
+    'Communication', 'Problem Solving', 'Critical Thinking', 'Teamwork', 'Time Management',
+    'Customer Service', 'Sales', 'Accounting', 'Finance', 'Human Resources', 'Research',
+    'Product Management', 'Machine Learning', 'Mobile Development', 'DevOps', 'Cloud Services',
+    'Database Management', 'SEO/SEM', 'Digital Marketing', 'Event Planning', 'Foreign Languages'
+  ];
+
+  const commonInterests = [
+    'Technology Conferences', 'Hackathons', 'Webinars', 'Workshops', 'Networking Events',
+    'Sports', 'Music', 'Art', 'Reading', 'Writing', 'Gaming', 'Travel', 'Cooking',
+    'Fitness', 'Photography', 'Movies', 'Theatre', 'Dance', 'Volunteering', 'Hiking',
+    'Cycling', 'Running', 'Swimming', 'Yoga', 'Meditation', 'Chess', 'Board Games',
+    'Startups', 'Investing', 'Entrepreneurship', 'Artificial Intelligence', 'Blockchain',
+    'Virtual Reality', 'Augmented Reality', 'Climate Change', 'Sustainability',
+    'Mental Health', 'Personal Development', 'Career Development', 'Education'
+  ];
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -55,6 +80,32 @@ function UserProfile() {
     fetchUserData();
   }, []);
 
+  useEffect(() => {
+    // Filter skills based on search query
+    if (searchSkillQuery) {
+      const filteredSkills = commonSkills.filter(skill => 
+        skill.toLowerCase().includes(searchSkillQuery.toLowerCase()) &&
+        !tempUser.skills.includes(skill)
+      );
+      setSkillSearchResults(filteredSkills);
+    } else {
+      setSkillSearchResults([]);
+    }
+  }, [searchSkillQuery, tempUser.skills]);
+
+  useEffect(() => {
+    // Filter interests based on search query
+    if (searchInterestQuery) {
+      const filteredInterests = commonInterests.filter(interest => 
+        interest.toLowerCase().includes(searchInterestQuery.toLowerCase()) &&
+        !tempUser.interests.includes(interest)
+      );
+      setInterestSearchResults(filteredInterests);
+    } else {
+      setInterestSearchResults([]);
+    }
+  }, [searchInterestQuery, tempUser.interests]);
+
   const toggleEditMode = (field) => {
     if (editMode[field]) {
       // If we're saving, update the user object
@@ -70,6 +121,14 @@ function UserProfile() {
 
   const cancelEdit = (field) => {
     setEditMode({...editMode, [field]: false});
+    // Reset search
+    if (field === 'skills') {
+      setSearchSkillQuery('');
+      setSkillSearchResults([]);
+    } else if (field === 'interests') {
+      setSearchInterestQuery('');
+      setInterestSearchResults([]);
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -80,6 +139,16 @@ function UserProfile() {
     if (newSkill.trim() && !tempUser.skills.includes(newSkill.trim())) {
       setTempUser({...tempUser, skills: [...tempUser.skills, newSkill.trim()]});
       setNewSkill('');
+      setSearchSkillQuery('');
+      setSkillSearchResults([]);
+    }
+  };
+
+  const handleAddSuggestedSkill = (skill) => {
+    if (!tempUser.skills.includes(skill)) {
+      setTempUser({...tempUser, skills: [...tempUser.skills, skill]});
+      setSearchSkillQuery('');
+      setSkillSearchResults([]);
     }
   };
 
@@ -94,6 +163,16 @@ function UserProfile() {
     if (newInterest.trim() && !tempUser.interests.includes(newInterest.trim())) {
       setTempUser({...tempUser, interests: [...tempUser.interests, newInterest.trim()]});
       setNewInterest('');
+      setSearchInterestQuery('');
+      setInterestSearchResults([]);
+    }
+  };
+
+  const handleAddSuggestedInterest = (interest) => {
+    if (!tempUser.interests.includes(interest)) {
+      setTempUser({...tempUser, interests: [...tempUser.interests, interest]});
+      setSearchInterestQuery('');
+      setInterestSearchResults([]);
     }
   };
 
@@ -111,7 +190,7 @@ function UserProfile() {
     try {
       const updateData = {};
       updateData[field] = tempUser[field];
-      console.log('Updating user data:', updateData); // Debugging line
+      console.log('Updating user data:', updateData);
       
       await axios.put('https://gem-arc-backend.onrender.com/api/user/update', updateData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -128,7 +207,7 @@ function UserProfile() {
 
   const handleProfilePhotoUpload = async (e) => {
     const file = e.target.files[0];
-    console.log('Selected file:', file); // Debugging line to check the file
+    console.log('Selected file:', file);
   
     if (!file) {
       console.error('No file selected');
@@ -157,7 +236,7 @@ function UserProfile() {
         }
       );
   
-      console.log('Upload successful', response); // Log the response
+      console.log('Upload successful', response);
   
       if (response.status === 200) {
         // Assuming backend returns the updated profile photo URL
@@ -365,21 +444,54 @@ function UserProfile() {
             </div>
 
             {editMode.skills && (
-              <div className="mb-4 flex">
-                <input 
-                  type="text" 
-                  value={newSkill} 
-                  onChange={(e) => setNewSkill(e.target.value)}
-                  placeholder="Add a new skill"
-                  className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
-                />
-                <button 
-                  onClick={handleAddSkill}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition-colors shadow-sm"
-                >
-                  Add
-                </button>
+              <div className="mb-4">
+                <div className="flex relative">
+                  <div className="flex-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaSearch className="text-gray-400" />
+                    </div>
+                    <input 
+                      type="text" 
+                      value={searchSkillQuery} 
+                      onChange={(e) => setSearchSkillQuery(e.target.value)}
+                      placeholder="Search for skills"
+                      className="w-full border border-gray-300 rounded-l-lg pl-10 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+                    />
+                  </div>
+                  <div className="flex">
+                    <input 
+                      type="text" 
+                      value={newSkill} 
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      placeholder="Or add custom skill"
+                      className="border-t border-b border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
+                    />
+                    <button 
+                      onClick={handleAddSkill}
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+                
+                {skillSearchResults.length > 0 && (
+                  <div className="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    <ul className="divide-y divide-gray-100">
+                      {skillSearchResults.map((skill, index) => (
+                        <li 
+                          key={index} 
+                          className="px-4 py-2 hover:bg-indigo-50 cursor-pointer flex items-center justify-between"
+                          onClick={() => handleAddSuggestedSkill(skill)}
+                        >
+                          <span>{skill}</span>
+                          <span className="text-xs text-indigo-600">Click to add</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
 
@@ -439,21 +551,54 @@ function UserProfile() {
             </div>
 
             {editMode.interests && (
-              <div className="mb-4 flex">
-                <input 
-                  type="text" 
-                  value={newInterest} 
-                  onChange={(e) => setNewInterest(e.target.value)}
-                  placeholder="Add a new interest"
-                  className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm"
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddInterest()}
-                />
-                <button 
-                  onClick={handleAddInterest}
-                  className="bg-green-600 text-white px-4 py-2 rounded-r-lg hover:bg-green-700 transition-colors shadow-sm"
-                >
-                  Add
-                </button>
+              <div className="mb-4">
+                <div className="flex relative">
+                  <div className="flex-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaSearch className="text-gray-400" />
+                    </div>
+                    <input 
+                      type="text" 
+                      value={searchInterestQuery} 
+                      onChange={(e) => setSearchInterestQuery(e.target.value)}
+                      placeholder="Search for interests"
+                      className="w-full border border-gray-300 rounded-l-lg pl-10 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 shadow-sm"
+                    />
+                  </div>
+                  <div className="flex">
+                    <input 
+                      type="text" 
+                      value={newInterest} 
+                      onChange={(e) => setNewInterest(e.target.value)}
+                      placeholder="Or add custom interest"
+                      className="border-t border-b border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-300 shadow-sm"
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddInterest()}
+                    />
+                    <button 
+                      onClick={handleAddInterest}
+                      className="bg-green-600 text-white px-4 py-2 rounded-r-lg hover:bg-green-700 transition-colors shadow-sm"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+                
+                {interestSearchResults.length > 0 && (
+                  <div className="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    <ul className="divide-y divide-gray-100">
+                      {interestSearchResults.map((interest, index) => (
+                        <li 
+                          key={index} 
+                          className="px-4 py-2 hover:bg-green-50 cursor-pointer flex items-center justify-between"
+                          onClick={() => handleAddSuggestedInterest(interest)}
+                        >
+                          <span>{interest}</span>
+                          <span className="text-xs text-green-600">Click to add</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
 
@@ -495,10 +640,6 @@ function UserProfile() {
                 month: 'long', 
                 day: 'numeric' 
               })}</span>
-            </div>
-            <div className="flex items-center bg-gray-50 p-4 rounded-lg">
-              <span className="font-medium text-gray-700 w-40">User ID:</span>
-              <span className="text-gray-500 font-mono text-sm">{user._id}</span>
             </div>
           </div>
         </div>

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ChevronLeft, ChevronRight, Clock, MapPin, ThumbsUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, MapPin, Tag, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const Carousel = () => {
+const RecommendedEventsCarousel = () => {
   const [events, setEvents] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
@@ -12,27 +12,37 @@ const Carousel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchUserRecommendedEvents = async () => {
       const token = localStorage.getItem('token');
       setLoading(true);
 
       try {
-        const res = await axios.get('https://gem-arc-backend.onrender.com/api/events/recommended', {
+        const res = await axios.get('https://gem-arc-backend.onrender.com/api/events/userRecommended', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setEvents(res.data);
+        
+        // Extract personalized events from the response
+        const personalizedEvents = res.data.categorized.personalized || [];
+        
+        if (personalizedEvents.length > 0) {
+          setEvents(personalizedEvents);
+        } else {
+          // Fallback to trending events if no personalized recommendations
+          setEvents(res.data.categorized.trending || []);
+        }
+        
         setError(null);
       } catch (err) {
-        console.error('Error fetching recommended events:', err);
-        setError('Failed to load events. Please try again later.');
+        console.error('Error fetching user recommended events:', err);
+        setError('Failed to load personalized events. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEvents();
+    fetchUserRecommendedEvents();
   }, []);
 
   useEffect(() => {
@@ -52,38 +62,15 @@ const Carousel = () => {
   };
 
   const handlePrev = (e) => {
-    e.stopPropagation(); // Prevent click from bubbling to parent (event link)
+    e.stopPropagation();
     setAutoplay(false);
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? events.length - 1 : prevIndex - 1));
   };
 
   const handleNext = (e) => {
-    e.stopPropagation(); // Prevent click from bubbling to parent (event link)
+    e.stopPropagation();
     setAutoplay(false);
     setCurrentIndex((prevIndex) => (prevIndex + 1) % events.length);
-  };
-
-  const handleRecommend = async (e, eventId) => {
-    e.stopPropagation(); // Prevent click from bubbling to parent (event link)
-    const token = localStorage.getItem('token');
-    
-    try {
-      await axios.post(`https://gem-arc-backend.onrender.com/api/events/${eventId}/recommend`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      // Update UI to show the event was recommended
-      setEvents(events.map(event => 
-        event._id === eventId 
-          ? { ...event, recommended: true, recommendCount: (event.recommendCount || 0) + 1 } 
-          : event
-      ));
-      
-    } catch (err) {
-      console.error('Error recommending event:', err);
-    }
   };
 
   const handleEventClick = (eventId) => {
@@ -91,7 +78,7 @@ const Carousel = () => {
   };
 
   const handleDotClick = (e, idx) => {
-    e.stopPropagation(); // Prevent click from bubbling to parent (event link)
+    e.stopPropagation();
     setAutoplay(false);
     setCurrentIndex(idx);
   };
@@ -100,7 +87,7 @@ const Carousel = () => {
     return (
       <div className="w-full h-96 bg-gray-100 flex flex-col items-center justify-center text-gray-600 rounded-xl shadow mb-6">
         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-lg font-semibold">Loading recommended events...</p>
+        <p className="text-lg font-semibold">Loading personalized events...</p>
       </div>
     );
   }
@@ -116,12 +103,15 @@ const Carousel = () => {
   if (events.length === 0) {
     return (
       <div className="w-full h-96 bg-gray-100 flex items-center justify-center text-gray-600 rounded-xl shadow mb-6">
-        <p className="text-lg font-semibold">No recommended events available</p>
+        <p className="text-lg font-semibold">No personalized events available</p>
       </div>
     );
   }
 
   const currentEvent = events[currentIndex];
+  const hasMatches = currentEvent.recommendation && 
+    ((currentEvent.recommendation.matchedSkills?.length > 0) || 
+     (currentEvent.recommendation.matchedInterests?.length > 0));
 
   return (
     <div className="w-full bg-gray-200 rounded-xl overflow-hidden shadow-lg mb-6 relative">
@@ -168,6 +158,15 @@ const Carousel = () => {
                 </span>
               </div>
               <h3 className="text-2xl font-bold">{currentEvent.name}</h3>
+              
+              {/* Display recommendation reason if available */}
+              {currentEvent.recommendation && currentEvent.recommendation.reason && (
+                <div className="flex items-center text-sm mt-1">
+                  <Tag className="w-4 h-4 mr-1 text-green-300" />
+                  <span className="text-green-200">{currentEvent.recommendation.reason}</span>
+                </div>
+              )}
+              
               <div className="flex items-center text-sm opacity-90 mt-1">
                 <Clock className="w-4 h-4 mr-1" />
                 <span>{formatDate(currentEvent.date)}</span>
@@ -217,4 +216,4 @@ const Carousel = () => {
   );
 };
 
-export default Carousel;
+export default RecommendedEventsCarousel;

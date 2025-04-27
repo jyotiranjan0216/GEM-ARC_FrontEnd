@@ -37,7 +37,7 @@ const EventCreate = () => {
                 interestsTags: formData.interestsTags.split(',').map(tag => tag.trim()).filter(Boolean)
             };
 
-            const { data } = await axios.post('https://gem-arc-backend.onrender.com/api/admin/create-event', eventData);
+            const { data } = await axios.post('http://localhost:5000/api/admin/create-event', eventData);
 
             toast.success(`Event created successfully! Notified ${data.notifiedUsers} matching users.`);
             navigate('/admin/events');

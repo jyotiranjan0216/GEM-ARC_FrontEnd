@@ -27,7 +27,17 @@ function Leaderboard() {
         }
 
         const leaderboardData = await leaderboardResponse.json();
-        setAllUsers(leaderboardData.allUsers);
+        
+        // Filter out admin users from the leaderboard
+        const filteredUsers = leaderboardData.allUsers.filter(user => !user.isAdmin);
+        
+        // Now assign ranks based on filtered list
+        filteredUsers.forEach((user, index) => {
+          console.log(user);
+          user.rank = index + 1;
+        });
+        
+        setAllUsers(filteredUsers);
         setCurrentUser(leaderboardData.currentUser);
       } catch (err) {
         console.error('Error fetching leaderboard:', err);
@@ -70,8 +80,8 @@ function Leaderboard() {
           <div className="text-red-500 font-semibold">{error}</div>
         ) : (
           <div className="space-y-6">
-            {/* Current User Card */}
-            {currentUser && (
+            {/* Current User Card - Only show if current user is not an admin */}
+            {currentUser && !currentUser.isAdmin && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -97,8 +107,26 @@ function Leaderboard() {
                 </div>
               </motion.div>
             )}
+            
+            {/* Admin Note - Show a message for admin users */}
+            {currentUser && currentUser.isAdmin && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-r from-blue-600 to-teal-600 rounded-xl p-6 text-white shadow-lg"
+              >
+                <div className="flex items-center justify-center">
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold">Admin Dashboard</h3>
+                    <p className="text-blue-100 mt-2">
+                      As an admin, you can view the leaderboard but your name is not displayed to regular users.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-            {/* Leaderboard List */}
+            {/* Leaderboard List - Only non-admin users */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="bg-gray-100 px-6 py-3 border-b border-gray-200">
                 <div className="grid grid-cols-12 font-medium text-gray-500">
@@ -111,7 +139,7 @@ function Leaderboard() {
 
               <div className="divide-y divide-gray-100">
                 {allUsers.map((user, index) => {
-                  const badge = getBadge(index + 1);
+                  const badge = getBadge(user.rank);
                   return (
                     <motion.div
                       key={user._id}
@@ -125,7 +153,7 @@ function Leaderboard() {
                       }`}
                     >
                       <div className="col-span-1 font-bold text-gray-700">
-                        #{index + 1}
+                        #{user.rank}
                       </div>
                       <div className="col-span-5 font-medium">
                         {user.name}

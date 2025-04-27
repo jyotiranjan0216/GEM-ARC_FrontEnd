@@ -181,7 +181,7 @@ function Feedback() {
           <div className="mb-6">
             <label className="block text-gray-700 font-medium mb-2">Feedback Type</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {['suggestion', 'bug', 'feature', 'praise'].map((type) => (
+              {['suggestion', 'bug', 'feature'].map((type) => (
                 <label
                   key={type}
                   className={`flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-colors
