@@ -20,11 +20,14 @@ const AdminLayout = ({ children }) => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Improved Logout Functionality
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    // Redirect to login page
-    window.location.href = '/';
+    const confirmLogout = window.confirm('Are you sure you want to logout?');
+    if (confirmLogout) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
   };
 
   return (

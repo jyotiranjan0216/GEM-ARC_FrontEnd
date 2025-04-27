@@ -18,6 +18,7 @@ import EventEdit from './pages/admin/EventEdit';
 import EventProposalList from './pages/admin/EventProposalList';
 import FeedbackList from './pages/admin/FeedbackList';
 import EventCreate from './pages/admin/EventCreate';
+import EventView from './pages/admin/EventView';
 
 function App() {
   const user = JSON.parse(localStorage.getItem('user')); // Assume user object like { isAdmin: true }
@@ -48,10 +49,11 @@ function App() {
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/event/:id" element={<Event />} />
 
-        {/* Admin routes */}
+        {/* Admin routes forntend*/}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/events" element={<EventList />} />
         <Route path="/admin/events/create" element={<EventCreate />} />
+        <Route path="/admin/events/view/:id" element={<EventView />} />
         <Route path="/admin/events/edit/:id" element={<EventEdit />} />
         <Route path="/admin/event-proposals" element={<EventProposalList />} />
         <Route path="/admin/feedback" element={<FeedbackList />} />

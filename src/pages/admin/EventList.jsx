@@ -26,6 +26,7 @@ const EventList = () => {
     }
   };
 
+  // Function to handle event deletion
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
@@ -76,6 +77,12 @@ const EventList = () => {
                       <td className="px-4 py-3">{event.organizedBy}</td>
                       <td className="px-4 py-3">
                         <div className="flex space-x-2">
+                          <button
+                            onClick={() => navigate(`/admin/events/view/${event._id}`)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm"
+                          >
+                            View
+                          </button>
                           <button
                             onClick={() => navigate(`/admin/events/edit/${event._id}`)}
                             className="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded text-sm"
