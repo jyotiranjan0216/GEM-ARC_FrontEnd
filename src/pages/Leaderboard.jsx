@@ -33,7 +33,7 @@ function Leaderboard() {
         
         // Now assign ranks based on filtered list
         filteredUsers.forEach((user, index) => {
-          console.log(user);
+          // console.log(user);
           user.rank = index + 1;
         });
         
