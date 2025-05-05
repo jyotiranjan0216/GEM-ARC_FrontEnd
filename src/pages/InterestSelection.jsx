@@ -32,7 +32,6 @@ function InterestSelection() {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-    // console.log('Selected Interests:', selectedInterests, " ", "token: ", token);
 
     if (!token) {
       alert('No token found. Please sign in again.');
