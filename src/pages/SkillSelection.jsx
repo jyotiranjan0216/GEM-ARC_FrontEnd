@@ -36,7 +36,6 @@ function SkillSelection() {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-    // console.log('Selected Skills:', selectedSkills, " ", "token: ", token);
 
     if (!token) {
       alert('No token found. Please sign in again.');
