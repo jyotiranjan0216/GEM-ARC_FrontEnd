@@ -121,13 +121,14 @@ const FeedbackList = () => {
 
   const fetchFeedback = async () => {
     try {
-      const { data } = await axios.get('https://gem-arc-backend.onrender.com/api/admin/feedback/all');
+      const { data } = await axios.get('http://localhost:5000/api/admin/feedback/all');
       
       // Add sentiment analysis to each feedback item
       const feedbackWithSentiment = data.feedback.map(item => ({
         ...item,
         sentiment: analyzeSentiment(item.message || '')
       }));
+      console.log(feedbackWithSentiment);
       
       setFeedback(feedbackWithSentiment);
     } catch (err) {
@@ -153,6 +154,7 @@ const FeedbackList = () => {
 
   const viewFeedbackDetails = (item) => {
     setSelectedFeedback(item);
+    console.log(item);
   };
 
   const closeModal = () => {
@@ -185,7 +187,6 @@ const FeedbackList = () => {
   // Calculate sentiment statistics based on filtered feedback
   const positiveCount = filteredFeedback.filter(item => item.sentiment === 'positive').length;
   const negativeCount = filteredFeedback.filter(item => item.sentiment === 'negative').length;
-  // const neutralCount = filteredFeedback.filter(item => item.sentiment === 'neutral').length;
 
   if (loading) return <AdminLayout><div className="text-center py-20">Loading feedback...</div></AdminLayout>;
   if (error) return <AdminLayout><div className="text-red-500 text-center py-20">Error: {error}</div></AdminLayout>;
@@ -270,12 +271,12 @@ const FeedbackList = () => {
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-blue-500 text-white rounded-lg shadow-md p-6">
+          <div className="bg-purple-500 text-white rounded-lg shadow-md p-6">
             <h3 className="text-xl font-semibold mb-2">Total Feedback</h3>
             <p className="text-3xl font-bold">{filteredFeedback.length}</p>
           </div>
           
-          <div className="bg-green-500 text-white rounded-lg shadow-md p-6">
+          <div className="bg-indigo-600 text-white rounded-lg shadow-md p-6">
             <h3 className="text-xl font-semibold mb-2">Average Rating</h3>
             <p className="text-3xl font-bold">
               {filteredFeedback.length > 0 
@@ -286,7 +287,7 @@ const FeedbackList = () => {
           </div>
           
           {/* Sentiment Statistics based on filtered feedback */}
-          <div className="bg-green-400 text-white rounded-lg shadow-md p-6">
+          <div className="bg-green-500 text-white rounded-lg shadow-md p-6">
             <h3 className="text-xl font-semibold mb-2">Positive Feedback</h3>
             <p className="text-3xl font-bold">
               {positiveCount}
@@ -296,7 +297,7 @@ const FeedbackList = () => {
             </p>
           </div>
           
-          <div className="bg-red-400 text-white rounded-lg shadow-md p-6">
+          <div className="bg-red-600 text-white rounded-lg shadow-md p-6">
             <h3 className="text-xl font-semibold mb-2">Negative Feedback</h3>
             <p className="text-3xl font-bold">
               {negativeCount}
@@ -366,63 +367,63 @@ const FeedbackList = () => {
       
       {/* Feedback Detail Modal */}
       {selectedFeedback && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl border-t-4 border-indigo-500 animate-fadeIn">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Feedback Details</h2>
+              <h2 className="text-2xl font-bold text-indigo-800">Feedback Details</h2>
               <button 
                 onClick={closeModal}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 rounded-full p-1"
               >
                 ✕
               </button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-gray-600 font-medium">Event</p>
-                <p>{selectedFeedback.name || "General"}</p>
+              <div className="bg-indigo-50 p-3 rounded-lg">
+                <p className="text-indigo-700 font-medium">Event</p>
+                <p className="font-semibold">{selectedFeedback.eventName || "General"}</p>
               </div>
               
-              <div>
-                <p className="text-gray-600 font-medium">User</p>
-                <p>{selectedFeedback.userName || "Anonymous"}</p>
+              <div className="bg-indigo-50 p-3 rounded-lg">
+                <p className="text-indigo-700 font-medium">User</p>
+                <p className="font-semibold">{selectedFeedback.userName || "Anonymous"}</p>
               </div>
               
-              <div>
-                <p className="text-gray-600 font-medium">Rating</p>
+              <div className="bg-indigo-50 p-3 rounded-lg">
+                <p className="text-indigo-700 font-medium">Rating</p>
                 <div className="flex items-center">
                   {getRatingStars(selectedFeedback.rating)}
-                  <span className="ml-2">({selectedFeedback.rating}/5)</span>
+                  <span className="ml-2 font-semibold">({selectedFeedback.rating}/5)</span>
                 </div>
               </div>
               
-              <div>
-                <p className="text-gray-600 font-medium">Submitted On</p>
-                <p>{new Date(selectedFeedback.createdAt).toLocaleString()}</p>
+              <div className="bg-indigo-50 p-3 rounded-lg">
+                <p className="text-indigo-700 font-medium">Submitted On</p>
+                <p className="font-semibold">{new Date(selectedFeedback.createdAt).toLocaleString()}</p>
               </div>
               
-              <div>
-                <p className="text-gray-600 font-medium">Sentiment Analysis</p>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSentimentColor(selectedFeedback.sentiment)}`}>
+              <div className="bg-indigo-50 p-3 rounded-lg">
+                <p className="text-indigo-700 font-medium">Sentiment Analysis</p>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mt-1 ${getSentimentColor(selectedFeedback.sentiment)}`}>
                   {getSentimentIcon(selectedFeedback.sentiment)} {selectedFeedback.sentiment.charAt(0).toUpperCase() + selectedFeedback.sentiment.slice(1)}
                 </span>
               </div>
               
-              <div>
-                <p className="text-gray-600 font-medium">Feedback Type</p>
-                <p className="capitalize">{selectedFeedback.feedbackType || "General"}</p>
+              <div className="bg-indigo-50 p-3 rounded-lg">
+                <p className="text-indigo-700 font-medium">Feedback Type</p>
+                <p className="capitalize font-semibold">{selectedFeedback.feedbackType || "General"}</p>
               </div>
             </div>
             
-            <div className="mb-4">
-              <p className="text-gray-600 font-medium">Subject</p>
-              <p className="mt-1">{selectedFeedback.subject}</p>
+            <div className="mb-4 bg-indigo-50 p-3 rounded-lg">
+              <p className="text-indigo-700 font-medium">Subject</p>
+              <p className="mt-1 font-semibold">{selectedFeedback.subject}</p>
             </div>
             
             <div className="mb-4">
-              <p className="text-gray-600 font-medium">Feedback Message</p>
-              <div className={`mt-2 p-3 rounded border ${getSentimentColor(selectedFeedback.sentiment)}`}>
+              <p className="text-indigo-700 font-medium">Feedback Message</p>
+              <div className={`mt-2 p-4 rounded-lg border-2 ${getSentimentColor(selectedFeedback.sentiment)}`}>
                 <p className="whitespace-pre-line">{selectedFeedback.message}</p>
               </div>
             </div>
@@ -430,7 +431,7 @@ const FeedbackList = () => {
             <div className="flex justify-end">
               <button 
                 onClick={closeModal}
-                className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
+                className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded shadow transition-colors"
               >
                 Close
               </button>
