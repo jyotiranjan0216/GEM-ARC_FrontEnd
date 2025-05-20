@@ -121,7 +121,7 @@ const FeedbackList = () => {
 
   const fetchFeedback = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/admin/feedback/all');
+      const { data } = await axios.get('https://gem-arc-backend.onrender.com/admin/feedback/all');
       
       // Add sentiment analysis to each feedback item
       const feedbackWithSentiment = data.feedback.map(item => ({
