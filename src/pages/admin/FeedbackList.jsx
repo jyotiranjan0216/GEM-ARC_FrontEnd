@@ -1,8 +1,105 @@
 // frontend/src/pages/admin/FeedbackList.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
 import AdminLayout from '../../components/layouts/AdminLayout';
+
+// Improved sentiment analysis function
+const analyzeSentiment = (text) => {
+  if (!text || text.trim() === '') return 'neutral';
+  
+  // Convert text to lowercase for easier comparison
+  const lowercaseText = text.toLowerCase();
+  
+  // Define positive and negative word lists
+  const positiveWords = [
+    'good', 'great', 'excellent', 'amazing', 'fantastic', 'wonderful', 'awesome',
+    'love', 'best', 'perfect', 'enjoy', 'helpful', 'impressive', 'outstanding',
+    'incredible', 'happy', 'satisfied', 'thanks', 'thank you', 'appreciate',
+    'easy', 'smooth', 'well', 'nice', 'liked', 'impressed', 'superb', 'brilliant',
+    'exceptional', 'delighted', 'pleased', 'favorite', 'convenient', 'efficient',
+    'fast', 'quick', 'intuitive', 'reliable', 'supportive', 'user-friendly',
+    'top-notch', 'flawless', 'clean', 'clear', 'understandable', 'responsive',
+    'time-saving', 'flexible', 'accessible', 'affordable', 'beautiful',
+    'seamless', 'love it', 'great job', 'well done', 'very good', 'very helpful'
+  ];
+
+  const negativeWords = [
+    'bad', 'poor', 'terrible', 'awful', 'horrible', 'disappointing', 'worst',
+    'hate', 'dislike', 'difficult', 'confusing', 'frustrating', 'annoying',
+    'issue', 'problem', 'error', 'fail', 'failed', 'broken', 'not working',
+    'slow', 'complicated', 'buggy', 'useless', 'waste', 'negative', 'hard',
+    'expensive', 'unhappy', 'dissatisfied', 'trouble', 'crash', 'lag', 'glitch',
+    'inaccurate', 'misleading', 'unresponsive', 'delayed', 'too slow',
+    'very bad', 'poor quality', 'not helpful', 'doesn’t work', 'worst experience',
+    'very disappointed', 'hate it', 'can’t use', 'problematic', 'lack', 'missing',
+    'confused', 'terribly slow', 'needs improvement'
+  ];
+
+  
+  // Count occurrences of positive and negative words
+  let positiveCount = 0;
+  let negativeCount = 0;
+  
+  // Check for positive words
+  positiveWords.forEach(word => {
+    const regex = new RegExp('\\b' + word + '\\b', 'gi');
+    const matches = lowercaseText.match(regex);
+    if (matches) positiveCount += matches.length;
+  });
+  
+  // Check for negative words
+  negativeWords.forEach(word => {
+    const regex = new RegExp('\\b' + word + '\\b', 'gi');
+    const matches = lowercaseText.match(regex);
+    if (matches) negativeCount += matches.length;
+  });
+  
+  // Factor in the star rating to weight the sentiment
+  const scoreFromRating = (rating) => {
+    if (rating >= 4) return 2; // Strongly positive
+    if (rating === 3) return 0; // Neutral
+    return -2; // Negative
+  };
+  
+  // Calculate overall sentiment - improved scoring
+  const sentimentScore = positiveCount - negativeCount;
+  
+  // Determine sentiment category with improved thresholds
+  if (sentimentScore > 0) return 'positive'; // Changed from >2 to >0
+  if (sentimentScore < 0) return 'negative';
+  
+  // If no clear sentiment from words, check if rating is available
+  if (text.rating) {
+    const ratingScore = scoreFromRating(text.rating);
+    if (ratingScore > 0) return 'positive';
+    if (ratingScore < 0) return 'negative';
+  }
+  
+  return 'neutral';
+};
+
+const getSentimentColor = (sentiment) => {
+  switch (sentiment) {
+    case 'positive':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'negative':
+      return 'bg-red-100 text-red-800 border-red-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
+const getSentimentIcon = (sentiment) => {
+  switch (sentiment) {
+    case 'positive':
+      return '😊';
+    case 'negative':
+      return '😔';
+    default:
+      return '😐';
+  }
+};
 
 const FeedbackList = () => {
   const [feedback, setFeedback] = useState([]);
@@ -11,7 +108,8 @@ const FeedbackList = () => {
   const [filters, setFilters] = useState({
     rating: 'all',
     search: '',
-    event: 'all'
+    event: 'all',
+    sentiment: 'all'
   });
   const [events, setEvents] = useState([]);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
@@ -24,7 +122,14 @@ const FeedbackList = () => {
   const fetchFeedback = async () => {
     try {
       const { data } = await axios.get('https://gem-arc-backend.onrender.com/api/admin/feedback/all');
-      setFeedback(data.feedback);
+      
+      // Add sentiment analysis to each feedback item
+      const feedbackWithSentiment = data.feedback.map(item => ({
+        ...item,
+        sentiment: analyzeSentiment(item.message || '')
+      }));
+      
+      setFeedback(feedbackWithSentiment);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch feedback');
     } finally {
@@ -70,11 +175,17 @@ const FeedbackList = () => {
     .filter(item => 
       (filters.rating === 'all' || Number(item.rating) === Number(filters.rating)) &&
       (filters.event === 'all' || item.eventId === filters.event) &&
+      (filters.sentiment === 'all' || item.sentiment === filters.sentiment) &&
       (filters.search === '' || 
         (item.eventName && item.eventName.toLowerCase().includes(filters.search.toLowerCase())) ||
         (item.userName && item.userName.toLowerCase().includes(filters.search.toLowerCase())) ||
         (item.message && item.message.toLowerCase().includes(filters.search.toLowerCase())))
     );
+
+  // Calculate sentiment statistics based on filtered feedback
+  const positiveCount = filteredFeedback.filter(item => item.sentiment === 'positive').length;
+  const negativeCount = filteredFeedback.filter(item => item.sentiment === 'negative').length;
+  // const neutralCount = filteredFeedback.filter(item => item.sentiment === 'neutral').length;
 
   if (loading) return <AdminLayout><div className="text-center py-20">Loading feedback...</div></AdminLayout>;
   if (error) return <AdminLayout><div className="text-red-500 text-center py-20">Error: {error}</div></AdminLayout>;
@@ -86,7 +197,7 @@ const FeedbackList = () => {
         
         {/* Filter Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Search
@@ -136,6 +247,24 @@ const FeedbackList = () => {
                 ))}
               </select>
             </div>
+            
+            {/* Sentiment Filter */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Sentiment Filter
+              </label>
+              <select
+                name="sentiment"
+                value={filters.sentiment}
+                onChange={handleFilterChange}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+              >
+                <option value="all">All Sentiments</option>
+                <option value="positive">Positive</option>
+                <option value="neutral">Neutral</option>
+                <option value="negative">Negative</option>
+              </select>
+            </div>
           </div>
         </div>
         
@@ -143,30 +272,37 @@ const FeedbackList = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-blue-500 text-white rounded-lg shadow-md p-6">
             <h3 className="text-xl font-semibold mb-2">Total Feedback</h3>
-            <p className="text-3xl font-bold">{feedback.length}</p>
+            <p className="text-3xl font-bold">{filteredFeedback.length}</p>
           </div>
           
           <div className="bg-green-500 text-white rounded-lg shadow-md p-6">
             <h3 className="text-xl font-semibold mb-2">Average Rating</h3>
             <p className="text-3xl font-bold">
-              {feedback.length > 0 
-                ? (feedback.reduce((sum, item) => sum + item.rating, 0) / feedback.length).toFixed(1)
+              {filteredFeedback.length > 0 
+                ? (filteredFeedback.reduce((sum, item) => sum + item.rating, 0) / filteredFeedback.length).toFixed(1)
                 : '0.0'}
               <span className="text-xl"> / 5</span>
             </p>
           </div>
           
-          <div className="bg-yellow-500 text-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold mb-2">Events with Feedback</h3>
+          {/* Sentiment Statistics based on filtered feedback */}
+          <div className="bg-green-400 text-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold mb-2">Positive Feedback</h3>
             <p className="text-3xl font-bold">
-              {new Set(feedback.map(item => item.eventId)).size - 1}
+              {positiveCount}
+              <span className="text-xl ml-2">
+                ({filteredFeedback.length > 0 ? Math.round((positiveCount / filteredFeedback.length) * 100) : 0}%)
+              </span>
             </p>
           </div>
           
-          <div className="bg-purple-500 text-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold mb-2">5-Star Reviews</h3>
+          <div className="bg-red-400 text-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold mb-2">Negative Feedback</h3>
             <p className="text-3xl font-bold">
-              {feedback.filter(item => item.rating === 5).length}
+              {negativeCount}
+              <span className="text-xl ml-2">
+                ({filteredFeedback.length > 0 ? Math.round((negativeCount / filteredFeedback.length) * 100) : 0}%)
+              </span>
             </p>
           </div>
         </div>
@@ -181,6 +317,7 @@ const FeedbackList = () => {
                     <th className="px-4 py-3 text-left font-medium text-gray-600">Event</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">User</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">Rating</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-600">Sentiment</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">Date</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">Message</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">Actions</th>
@@ -189,13 +326,18 @@ const FeedbackList = () => {
                 <tbody className="divide-y divide-gray-200">
                   {filteredFeedback.map((item) => (
                     <tr key={item._id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">{item.name}</td>
-                      <td className="px-4 py-3">{item.userName}</td>
+                      <td className="px-4 py-3">{item.name || "General"}</td>
+                      <td className="px-4 py-3">{item.userName || "Anonymous"}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center">
                           {getRatingStars(item.rating)}
                           <span className="ml-2">({item.rating})</span>
                         </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSentimentColor(item.sentiment)}`}>
+                          {getSentimentIcon(item.sentiment)} {item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1)}
+                        </span>
                       </td>
                       <td className="px-4 py-3">{new Date(item.createdAt).toLocaleDateString()}</td>
                       <td className="px-4 py-3">
@@ -239,12 +381,12 @@ const FeedbackList = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <p className="text-gray-600 font-medium">Event</p>
-                <p>{selectedFeedback.name}</p>
+                <p>{selectedFeedback.name || "General"}</p>
               </div>
               
               <div>
                 <p className="text-gray-600 font-medium">User</p>
-                <p>{selectedFeedback.userName}</p>
+                <p>{selectedFeedback.userName || "Anonymous"}</p>
               </div>
               
               <div>
@@ -259,11 +401,28 @@ const FeedbackList = () => {
                 <p className="text-gray-600 font-medium">Submitted On</p>
                 <p>{new Date(selectedFeedback.createdAt).toLocaleString()}</p>
               </div>
+              
+              <div>
+                <p className="text-gray-600 font-medium">Sentiment Analysis</p>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSentimentColor(selectedFeedback.sentiment)}`}>
+                  {getSentimentIcon(selectedFeedback.sentiment)} {selectedFeedback.sentiment.charAt(0).toUpperCase() + selectedFeedback.sentiment.slice(1)}
+                </span>
+              </div>
+              
+              <div>
+                <p className="text-gray-600 font-medium">Feedback Type</p>
+                <p className="capitalize">{selectedFeedback.feedbackType || "General"}</p>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <p className="text-gray-600 font-medium">Subject</p>
+              <p className="mt-1">{selectedFeedback.subject}</p>
             </div>
             
             <div className="mb-4">
               <p className="text-gray-600 font-medium">Feedback Message</p>
-              <div className="mt-2 p-3 bg-gray-50 rounded border border-gray-200">
+              <div className={`mt-2 p-3 rounded border ${getSentimentColor(selectedFeedback.sentiment)}`}>
                 <p className="whitespace-pre-line">{selectedFeedback.message}</p>
               </div>
             </div>
